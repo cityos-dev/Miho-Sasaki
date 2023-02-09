@@ -1,1 +1,36 @@
 version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: video-server
+    environment:
+      GOOS: linux
+      GOARCH: amd64
+      CGO_ENABLED: '0'
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    networks:
+      - default
+    tty: true
+
+  db:
+    image: mysql:5.7
+    container_name: storage-db
+    platform: linux/amd64
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_DATABASE=storage_database
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    ports:
+      - '3306:3306'
+    networks:
+      - default
+    tty: true
