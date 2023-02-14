@@ -13,7 +13,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - .ci:/ci
+      - ./ci:/ci
     depends_on:
       - db
     command: ["/ci/wait-for-it.sh", "/app"]
