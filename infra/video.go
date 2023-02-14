@@ -13,7 +13,8 @@ import (
 const tableName = "video"
 
 type Video struct {
-	Id       int `xorm:"'id' pk autoincr"`
+	Id       int    `xorm:"'id' pk autoincr"`
+	FileId   string `xorm:"unique"`
 	FileName string
 	Size     int
 	Type     string
@@ -24,7 +25,7 @@ type Video struct {
 type VideoDatabase interface {
 	GetFiles() ([]*Video, error)
 	GetFile(id int) (*Video, error)
-	CreateFile(video *Video, file multipart.File) error
+	CreateFile(video *Video, file multipart.File) (string, error)
 	DeleteFile(id int) error
 	GetFilePathBy(v *Video) string
 }
@@ -65,27 +66,27 @@ func (vd *videoDatabase) GetFile(id int) (*Video, error) {
 	return &video, nil
 }
 
-func (vd *videoDatabase) CreateFile(video *Video, file multipart.File) error {
+func (vd *videoDatabase) CreateFile(video *Video, file multipart.File) (string, error) {
 	session := vd.engine.NewSession()
 	err := session.Begin()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer session.Close()
 
 	if _, err := vd.engine.Table(tableName).Insert(video); err != nil {
-		return err
+		return "", err
 	}
 
-	err = vd.fileServer.StoreFile(video.FileName, video.Id, file)
+	filePath, err := vd.fileServer.StoreFile(video.FileName, video.Id, file)
 	if err != nil {
 		session.Rollback()
-		return err
+		return "", err
 	}
 
 	session.Commit()
 
-	return nil
+	return filePath, nil
 }
 
 func (vd *videoDatabase) DeleteFile(id int) error {

@@ -63,18 +63,19 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 	ft := fileHeader.Header.Get("Content-Type")
 	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
 		log.Println(ft)
-		sh.errorHandler(c, errors.New(helpers.ContentTypeIsWrong), http.StatusInternalServerError)
+		sh.errorHandler(c, errors.New(helpers.UnsupportedMediaType), http.StatusUnsupportedMediaType)
 		return
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	err = s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
+	contentLocation, err := s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
 	if err != nil {
-		sh.errorHandler(c, err, http.StatusInternalServerError)
+		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Header("Location", contentLocation)
+	c.Status(http.StatusCreated)
 }
 
 // DeleteFilesFileId delete video file with id
@@ -113,7 +114,6 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	}
 
 	c.File(filePath)
-	//c.String(http.StatusOK, "OK")
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {

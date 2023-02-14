@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
+	"videoservice/helpers"
 	"videoservice/infra"
 )
 
@@ -13,7 +14,7 @@ type VideoService interface {
 	GetFilePathById(ctx context.Context, id int) (string, error)
 	GetFiles(ctx context.Context) ([]*infra.Video, error)
 	DeleteFile(ctx context.Context, id int) error
-	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) error
+	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) (string, error)
 }
 
 type videoService struct {
@@ -54,20 +55,22 @@ func (vs *videoService) DeleteFile(ctx context.Context, id int) error {
 }
 
 func (vs *videoService) CreateFile(ctx context.Context, size int, name string, ct string,
-	file multipart.File) error {
-	err := vs.vd.CreateFile(
-		&infra.Video{
-			FileName: name,
-			Size:     size,
-			Type:     ct,
-		},
-		file,
-	)
+	file multipart.File) (string, error) {
+	randomStr, err := helpers.MakeRandomStr(20)
+	video := &infra.Video{
+		FileName: name,
+		FileId:   randomStr,
+		Size:     size,
+		Type:     ct,
+	}
+	filePath, err := vs.vd.CreateFile(video, file)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	contentLocation := filePath + video.FileId
+
+	return contentLocation, nil
 }
 
 func SetFactoryMiddleware(svc VideoService) gin.HandlerFunc {
