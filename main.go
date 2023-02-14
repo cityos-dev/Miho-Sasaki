@@ -19,8 +19,7 @@ func main() {
 	}
 
 	factory := service.NewVideoService(infra.NewVideDatabase(engine,
-		infra.NewFileServer("/video")),
-		infra.NewFileServer("/video"))
+		infra.NewFileServer("/video")))
 
 	g.Use(service.SetFactoryMiddleware(factory))
 

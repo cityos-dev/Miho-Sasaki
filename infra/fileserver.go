@@ -11,7 +11,7 @@ import (
 const contentsPath = "../contents"
 
 type FileServer interface {
-	StoreFile(name string, id int, size int, content multipart.File) error
+	StoreFile(name string, id int, content multipart.File) error
 	DeleteFile(name string, id int) error
 	GetFilePath(id int) string
 }
@@ -24,7 +24,7 @@ func NewFileServer(path string) FileServer {
 	return &fileServer{filePath: path}
 }
 
-func (fs *fileServer) StoreFile(name string, id int, size int, content multipart.File) error {
+func (fs *fileServer) StoreFile(name string, id int, content multipart.File) error {
 	err := os.MkdirAll(fs.GetFilePath(id), os.ModePerm)
 	if err != nil {
 		return err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"mime/multipart"
-	"net/http"
 	"videoservice/infra"
 )
 
@@ -19,11 +18,10 @@ type VideoService interface {
 
 type videoService struct {
 	vd infra.VideoDatabase
-	fs infra.FileServer
 }
 
-func NewVideoService(d infra.VideoDatabase, f infra.FileServer) VideoService {
-	return &videoService{vd: d, fs: f}
+func NewVideoService(d infra.VideoDatabase) VideoService {
+	return &videoService{vd: d}
 }
 
 func (vs *videoService) GetFilePathById(ctx context.Context, id int) (string, error) {
@@ -32,7 +30,7 @@ func (vs *videoService) GetFilePathById(ctx context.Context, id int) (string, er
 		return "", err
 	}
 
-	filePath := vs.fs.GetFilePath(v.Id) + v.FileName
+	filePath := vs.vd.GetFilePathBy(v)
 
 	return filePath, nil
 }
@@ -47,12 +45,7 @@ func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
 }
 
 func (vs *videoService) DeleteFile(ctx context.Context, id int) error {
-	video, err := vs.vd.DeleteFile(id)
-	if err != nil {
-		return err
-	}
-
-	err = vs.fs.DeleteFile(video.FileName, video.Id)
+	err := vs.vd.DeleteFile(id)
 	if err != nil {
 		return err
 	}
@@ -62,40 +55,19 @@ func (vs *videoService) DeleteFile(ctx context.Context, id int) error {
 
 func (vs *videoService) CreateFile(ctx context.Context, size int, name string, ct string,
 	file multipart.File) error {
-	v, session, err := vs.vd.CreateFile(
+	err := vs.vd.CreateFile(
 		&infra.Video{
 			FileName: name,
 			Size:     size,
 			Type:     ct,
-		})
+		},
+		file,
+	)
 	if err != nil {
 		return err
 	}
-	defer session.Close()
-
-	err = vs.fs.StoreFile(name, v.Id, v.Size, file)
-	if err != nil {
-		session.Rollback()
-		return err
-	}
-
-	session.Commit()
 
 	return nil
-}
-
-func ValidateAndResponseContentType(file multipart.File) (string, error) {
-	// To sniff the content type only the first, 512 bytes are used.
-	buf := make([]byte, 512)
-
-	_, err := file.Read(buf)
-	if err != nil {
-		return "", nil
-	}
-
-	file.Seek(0, 0)
-	ct := http.DetectContentType(buf)
-	return ct, nil
 }
 
 func SetFactoryMiddleware(svc VideoService) gin.HandlerFunc {
