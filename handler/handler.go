@@ -14,19 +14,19 @@ import (
 
 type ServerHandler interface {
 
-	// (GET /files)
+	//GetFiles (GET /files)
 	GetFiles(c *gin.Context)
 
-	// (POST /files)
+	//PostFiles (POST /files)
 	PostFiles(c *gin.Context)
 
-	// (DELETE /files/{fileid})
+	//DeleteFilesFileId (DELETE /files/{fileid})
 	DeleteFilesFileId(c *gin.Context)
 
-	// (GET /files/{fileid})
+	//GetFilesFileId (GET /files/{fileid})
 	GetFilesFileId(c *gin.Context)
 
-	// (GET /health)
+	//GetHealth (GET /health)
 	GetHealth(c *gin.Context)
 }
 
@@ -47,13 +47,12 @@ func (sh *serverHandler) GetFiles(c *gin.Context) {
 	s := c.MustGet(service.Key).(service.VideoService)
 	videos, err := s.GetFiles(c)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		sh.errorHandler(c, err, http.StatusInternalServerError)
 		return
 	}
 
 	res := model.ConvertVideoToVideoResponse(videos)
 	c.JSON(http.StatusOK, res)
-
 }
 
 // PostFiles store video file
@@ -64,14 +63,14 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 	ft := fileHeader.Header.Get("Content-Type")
 	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
 		log.Println(ft)
-		c.AbortWithError(http.StatusInternalServerError, errors.New(helpers.ContentTypeIsWrong))
+		sh.errorHandler(c, errors.New(helpers.ContentTypeIsWrong), http.StatusInternalServerError)
 		return
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
 	err = s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		sh.errorHandler(c, err, http.StatusInternalServerError)
 		return
 	}
 
@@ -83,14 +82,14 @@ func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
 	id := c.Param("id")
 	fileId, err := strconv.Atoi(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New(helpers.ParamIsInvalid))
+		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
 		return
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
 	err = s.DeleteFile(c, fileId)
 	if err != nil {
-		c.AbortWithError(helpers.GetStatusCodeFromErr(err), err)
+		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
@@ -102,21 +101,21 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	id := c.Param("id")
 	fileId, err := strconv.Atoi(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, errors.New(helpers.ParamIsInvalid))
+		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
 		return
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
 	filePath, err := s.GetFilePathById(c, fileId)
 	if err != nil {
-		c.AbortWithError(helpers.GetStatusCodeFromErr(err), err)
+		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
 	c.File(filePath)
-	c.Status(http.StatusOK)
+	//c.String(http.StatusOK, "OK")
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
-	c.String(http.StatusOK, "hello!")
+	c.String(http.StatusOK, "OK")
 }
