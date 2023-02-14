@@ -12,8 +12,11 @@ services:
       CGO_ENABLED: '0'
     ports:
       - '8080:8080'
+    volumes:
+      - ./ci:/ci
     depends_on:
       - db
+    command: ["/ci/wait-for-it.sh", "/app"]
     networks:
       - default
     tty: true
