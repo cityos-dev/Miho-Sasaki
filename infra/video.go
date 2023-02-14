@@ -2,6 +2,7 @@ package infra
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 	"videoservice/helpers"
@@ -28,12 +29,14 @@ type VideoDatabase interface {
 }
 
 type videoDatabase struct {
-	engine *xorm.Engine
+	engine     *xorm.Engine
+	fileServer FileServer
 }
 
-func NewVideDatabase(en *xorm.Engine) VideoDatabase {
+func NewVideDatabase(en *xorm.Engine, fs FileServer) VideoDatabase {
 	return &videoDatabase{
-		engine: en,
+		engine:     en,
+		fileServer: fs,
 	}
 }
 
@@ -77,13 +80,21 @@ func (vd *videoDatabase) CreateFile(video *Video) (*Video, *xorm.Session, error)
 }
 
 func (vd *videoDatabase) DeleteFile(id int) (*Video, error) {
-	video := Video{}
-	var affected int64
-	if a, err := vd.engine.Table(tableName).Where("id = ?", id).Delete(&video); err != nil {
-		affected = a
+	session := vd.engine.NewSession()
+	err := session.Begin()
+	if err != nil {
 		return nil, err
 	}
 
+	video := Video{}
+	affected, err := vd.engine.Table(tableName).ID(id).Delete(&video)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("affected")
+	fmt.Println(affected)
+	fmt.Println(video)
 	if affected == 0 {
 		return nil, errors.New(helpers.FileNotFound)
 	}

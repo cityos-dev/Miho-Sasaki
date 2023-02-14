@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 	"videoservice/helpers"
@@ -60,8 +61,9 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("data")
 	defer file.Close()
 
-	ft, err := service.ValidateAndResponseContentType(file)
-	if err != nil || ft != "video/mp4" && ft != "video/mpeg" {
+	ft := fileHeader.Header.Get("Content-Type")
+	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
+		log.Println(ft)
 		c.AbortWithError(http.StatusInternalServerError, errors.New(helpers.ContentTypeIsWrong))
 		return
 	}
@@ -105,14 +107,14 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	_, video, fpath, err := s.GetFileWithId(c, fileId)
+	filePath, err := s.GetFilePathById(c, fileId)
 	if err != nil {
 		c.AbortWithError(helpers.GetStatusCodeFromErr(err), err)
 		return
 	}
-	c.FileAttachment(fpath, video.FileName)
+
+	c.File(filePath)
 	c.Status(http.StatusOK)
-	//c.Data(http.StatusOK, video.Type, contents)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {

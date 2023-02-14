@@ -18,7 +18,8 @@ func main() {
 		log.Fatalf("error occurs when setting up mysql: %v", err)
 	}
 
-	factory := service.NewVideoService(infra.NewVideDatabase(engine),
+	factory := service.NewVideoService(infra.NewVideDatabase(engine,
+		infra.NewFileServer("/video")),
 		infra.NewFileServer("/video"))
 
 	g.Use(service.SetFactoryMiddleware(factory))

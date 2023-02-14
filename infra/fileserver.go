@@ -11,7 +11,6 @@ import (
 const contentsPath = "../contents"
 
 type FileServer interface {
-	GetFile(name string, id int, size int) ([]byte, error)
 	StoreFile(name string, id int, size int, content multipart.File) error
 	DeleteFile(name string, id int) error
 	GetFilePath(id int) string
@@ -25,25 +24,6 @@ func NewFileServer(path string) FileServer {
 	return &fileServer{filePath: path}
 }
 
-// GetFile filepath example: ../contents + /video + /id/ + name
-func (fs *fileServer) GetFile(name string, id int, size int) ([]byte, error) {
-	f, err := os.Open(fs.GetFilePath(id) + name)
-	if err != nil {
-		return nil, err
-	}
-
-	defer f.Close()
-	data := make([]byte, size)
-	length, err := f.Read(data)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("length  ")
-	log.Println(length)
-
-	return data, nil
-}
-
 func (fs *fileServer) StoreFile(name string, id int, size int, content multipart.File) error {
 	err := os.MkdirAll(fs.GetFilePath(id), os.ModePerm)
 	if err != nil {
@@ -54,16 +34,13 @@ func (fs *fileServer) StoreFile(name string, id int, size int, content multipart
 	if err != nil {
 		return err
 	}
-	log.Println("path")
-	log.Println(fs.GetFilePath(id) + name)
 
 	defer f.Close()
 	written, err := io.Copy(f, content)
 	if err != nil {
 		return err
 	}
-	log.Println("written  ")
-	log.Println(written)
+	log.Printf("%d bytes are written", written)
 
 	return nil
 }

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"videoservice/infra"
@@ -12,7 +11,7 @@ import (
 const Key = "video_service_factory"
 
 type VideoService interface {
-	GetFileWithId(ctx context.Context, id int) ([]byte, *infra.Video, string, error)
+	GetFilePathById(ctx context.Context, id int) (string, error)
 	GetFiles(ctx context.Context) ([]*infra.Video, error)
 	DeleteFile(ctx context.Context, id int) error
 	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) error
@@ -27,19 +26,15 @@ func NewVideoService(d infra.VideoDatabase, f infra.FileServer) VideoService {
 	return &videoService{vd: d, fs: f}
 }
 
-func (vs *videoService) GetFileWithId(ctx context.Context, id int) ([]byte, *infra.Video, string, error) {
+func (vs *videoService) GetFilePathById(ctx context.Context, id int) (string, error) {
 	v, err := vs.vd.GetFile(id)
 	if err != nil {
-		log.Println(id)
-		return nil, nil, "", err
+		return "", err
 	}
 
-	contents, err := vs.fs.GetFile(v.FileName, v.Id, v.Size)
-	if err != nil {
-		return nil, nil, "", err
-	}
+	filePath := vs.fs.GetFilePath(v.Id) + v.FileName
 
-	return contents, v, vs.fs.GetFilePath(v.Id), nil
+	return filePath, nil
 }
 
 func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
@@ -98,6 +93,7 @@ func ValidateAndResponseContentType(file multipart.File) (string, error) {
 		return "", nil
 	}
 
+	file.Seek(0, 0)
 	ct := http.DetectContentType(buf)
 	return ct, nil
 }
