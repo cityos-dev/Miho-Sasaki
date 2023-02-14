@@ -36,9 +36,9 @@ func RegisterHandlersWithOptions(rg *gin.RouterGroup, si handler.ServerHandler) 
 
 	rg.POST("/files", si.PostFiles)
 
-	rg.DELETE("/files/:id", si.DeleteFilesFileId)
+	rg.DELETE("/files/:fileid", si.DeleteFilesFileId)
 
-	rg.GET("/files/:id", si.GetFilesFileId)
+	rg.GET("/files/:fileid", si.GetFilesFileId)
 
 	rg.GET("/health", si.GetHealth)
 }

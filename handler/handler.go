@@ -2,13 +2,13 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"strconv"
+
+	"github.com/gin-gonic/gin"
+
 	"videoservice/helpers"
 	"videoservice/model"
-
 	"videoservice/service"
 )
 
@@ -80,15 +80,10 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 
 // DeleteFilesFileId delete video file with id
 func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
-	id := c.Param("id")
-	fileId, err := strconv.Atoi(id)
-	if err != nil {
-		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
-		return
-	}
+	fileId := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	err = s.DeleteFile(c, fileId)
+	err := s.DeleteFile(c, fileId)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
@@ -99,15 +94,10 @@ func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
 
 // GetFilesFileId get file with file id
 func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
-	id := c.Param("id")
-	fileId, err := strconv.Atoi(id)
-	if err != nil {
-		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
-		return
-	}
+	id := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	filePath, err := s.GetFilePathById(c, fileId)
+	filePath, err := s.GetFilePathById(c, id)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return

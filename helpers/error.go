@@ -5,8 +5,6 @@ import (
 )
 
 var (
-	ContentTypeIsWrong   = "content type is wrong"
-	ParamIsInvalid       = "params is invalid"
 	FileNotFound         = "file not found"
 	UnsupportedMediaType = "this media type is not supported"
 )

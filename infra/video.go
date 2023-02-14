@@ -5,9 +5,9 @@ import (
 	"log"
 	"mime/multipart"
 	"time"
-	"videoservice/helpers"
-
 	"xorm.io/xorm"
+
+	"videoservice/helpers"
 )
 
 const tableName = "video"
@@ -24,9 +24,9 @@ type Video struct {
 
 type VideoDatabase interface {
 	GetFiles() ([]*Video, error)
-	GetFile(id int) (*Video, error)
+	GetFile(id string) (*Video, error)
 	CreateFile(video *Video, file multipart.File) (string, error)
-	DeleteFile(id int) error
+	DeleteFile(id string) error
 	GetFilePathBy(v *Video) string
 }
 
@@ -51,9 +51,9 @@ func (vd *videoDatabase) GetFiles() ([]*Video, error) {
 	return video, nil
 }
 
-func (vd *videoDatabase) GetFile(id int) (*Video, error) {
+func (vd *videoDatabase) GetFile(id string) (*Video, error) {
 	var video Video
-	found, err := vd.engine.Table(tableName).ID(id).Get(&video)
+	found, err := vd.engine.Table(tableName).Where("file_id=?", id).Get(&video)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -89,7 +89,7 @@ func (vd *videoDatabase) CreateFile(video *Video, file multipart.File) (string, 
 	return filePath, nil
 }
 
-func (vd *videoDatabase) DeleteFile(id int) error {
+func (vd *videoDatabase) DeleteFile(id string) error {
 	session := vd.engine.NewSession()
 	err := session.Begin()
 	if err != nil {
@@ -98,7 +98,7 @@ func (vd *videoDatabase) DeleteFile(id int) error {
 	defer session.Close()
 
 	var video Video
-	found, err := vd.engine.Table(tableName).ID(id).Get(&video)
+	found, err := vd.engine.Table(tableName).Where("file_id=?", id).Get(&video)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -108,7 +108,7 @@ func (vd *videoDatabase) DeleteFile(id int) error {
 		return errors.New(helpers.FileNotFound)
 	}
 
-	affected, err := vd.engine.Table(tableName).ID(id).Delete(&Video{})
+	affected, err := vd.engine.Table(tableName).ID(video.Id).Delete(&Video{})
 	if err != nil {
 		return err
 	}

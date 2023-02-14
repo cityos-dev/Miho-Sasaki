@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"mime/multipart"
+
+	"github.com/gin-gonic/gin"
+
 	"videoservice/helpers"
 	"videoservice/infra"
 )
@@ -11,9 +13,9 @@ import (
 const Key = "video_service_factory"
 
 type VideoService interface {
-	GetFilePathById(ctx context.Context, id int) (string, error)
+	GetFilePathById(ctx context.Context, id string) (string, error)
 	GetFiles(ctx context.Context) ([]*infra.Video, error)
-	DeleteFile(ctx context.Context, id int) error
+	DeleteFile(ctx context.Context, id string) error
 	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) (string, error)
 }
 
@@ -25,7 +27,7 @@ func NewVideoService(d infra.VideoDatabase) VideoService {
 	return &videoService{vd: d}
 }
 
-func (vs *videoService) GetFilePathById(ctx context.Context, id int) (string, error) {
+func (vs *videoService) GetFilePathById(ctx context.Context, id string) (string, error) {
 	v, err := vs.vd.GetFile(id)
 	if err != nil {
 		return "", err
@@ -45,7 +47,7 @@ func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
 	return files, nil
 }
 
-func (vs *videoService) DeleteFile(ctx context.Context, id int) error {
+func (vs *videoService) DeleteFile(ctx context.Context, id string) error {
 	err := vs.vd.DeleteFile(id)
 	if err != nil {
 		return err
@@ -57,6 +59,9 @@ func (vs *videoService) DeleteFile(ctx context.Context, id int) error {
 func (vs *videoService) CreateFile(ctx context.Context, size int, name string, ct string,
 	file multipart.File) (string, error) {
 	randomStr, err := helpers.MakeRandomStr(20)
+	if err != nil {
+		return "", err
+	}
 	video := &infra.Video{
 		FileName: name,
 		FileId:   randomStr,
