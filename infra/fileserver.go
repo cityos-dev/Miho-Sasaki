@@ -61,5 +61,5 @@ func (fs *fileServer) DeleteFile(name string, id int) error {
 }
 
 func (fs *fileServer) GetFilePath(id int) string {
-	return contentsPath + fs.filePath + "/" + strconv.Itoa(id)
+	return contentsPath + fs.filePath + "/" + strconv.Itoa(id) + "/"
 }
