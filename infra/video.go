@@ -128,5 +128,5 @@ func (vd *videoDatabase) DeleteFile(id string) error {
 }
 
 func (vd *videoDatabase) GetFilePathBy(v *Video) string {
-	return vd.fileServer.GetFilePath(v.Id) + v.FileName
+	return vd.fileServer.GetFilePath(v.Id)
 }

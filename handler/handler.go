@@ -97,13 +97,14 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	id := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	filePath, err := s.GetFilePathById(c, id)
+	v, filePath, err := s.GetFilePathById(c, id)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
-	c.File(filePath)
+	c.FileAttachment(filePath, v.FileName)
+	//c.File(filePath)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
