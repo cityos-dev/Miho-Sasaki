@@ -7,6 +7,7 @@ import (
 var (
 	FileNotFound         = "file not found"
 	UnsupportedMediaType = "this media type is not supported"
+	BadRequest           = "bad request"
 )
 
 func GetStatusCodeFromErr(err error) int {
@@ -15,6 +16,8 @@ func GetStatusCodeFromErr(err error) int {
 		return http.StatusNotFound
 	case UnsupportedMediaType:
 		return http.StatusUnsupportedMediaType
+	case BadRequest:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

@@ -59,6 +59,10 @@ func (sh *serverHandler) GetFiles(c *gin.Context) {
 func (sh *serverHandler) PostFiles(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("data")
 	defer file.Close()
+	if fileHeader.Size == 0 {
+		sh.errorHandler(c, errors.New(helpers.BadRequest), http.StatusBadRequest)
+		return
+	}
 
 	ft := fileHeader.Header.Get("Content-Type")
 	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
@@ -103,8 +107,8 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 		return
 	}
 
+	c.Header("Content-Type", v.Type)
 	c.FileAttachment(filePath, v.FileName)
-	//c.File(filePath)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
