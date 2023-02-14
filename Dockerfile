@@ -14,5 +14,5 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o server ../myapp/main.go
 
 FROM alpine:3.10
 COPY --from=builder /myapp/server /app
-EXPOSE 8080
-CMD ["/app"]
+#EXPOSE 8080
+#CMD ["/app"]
