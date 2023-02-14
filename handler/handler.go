@@ -58,11 +58,12 @@ func (sh *serverHandler) GetFiles(c *gin.Context) {
 // PostFiles store video file
 func (sh *serverHandler) PostFiles(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("data")
-	defer file.Close()
-	if fileHeader.Size == 0 {
+	if err != nil {
+		log.Println(err)
 		sh.errorHandler(c, errors.New(helpers.BadRequest), http.StatusBadRequest)
 		return
 	}
+	defer file.Close()
 
 	ft := fileHeader.Header.Get("Content-Type")
 	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
