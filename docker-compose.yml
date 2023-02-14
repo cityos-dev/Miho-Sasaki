@@ -13,10 +13,10 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./tmp:/tmp
+      - .ci:/ci
     depends_on:
       - db
-    command: ["/tmp/wait-for-it.sh", "/app"]
+    command: ["/ci/wait-for-it.sh", "/app"]
     networks:
       - default
     tty: true
