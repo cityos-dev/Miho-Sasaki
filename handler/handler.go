@@ -108,7 +108,8 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", v.Type)
-	c.FileAttachment(filePath, v.FileName)
+	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+v.FileName+`"`)
+	c.File(filePath + v.FileName)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
