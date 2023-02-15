@@ -1,6 +1,5 @@
 #!/bin/ash
 # wait-for-it.sh
-
 set -e
 
 until nc -z db 3306; do
