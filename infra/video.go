@@ -24,7 +24,7 @@ type Video struct {
 
 type VideoDatabase interface {
 	GetFiles() ([]*Video, error)
-	GetFile(id string) (*Video, error)
+	GetFile(id string) (*Video, []byte, error)
 	CreateFile(video *Video, file multipart.File) (string, error)
 	DeleteFile(id string) error
 	GetFilePathBy(v *Video) string
@@ -51,19 +51,25 @@ func (vd *videoDatabase) GetFiles() ([]*Video, error) {
 	return video, nil
 }
 
-func (vd *videoDatabase) GetFile(id string) (*Video, error) {
+func (vd *videoDatabase) GetFile(id string) (*Video, []byte, error) {
 	var video Video
 	found, err := vd.engine.Table(tableName).Where("file_id=?", id).Get(&video)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	if !found {
-		return nil, errors.New(helpers.FileNotFound)
+		return nil, nil, errors.New(helpers.FileNotFound)
 	}
 
-	return &video, nil
+	contents, err := vd.fileServer.GetFileContent(video.FileName, video.Id)
+	if err != nil {
+		log.Println(err)
+		return nil, nil, err
+	}
+
+	return &video, contents, nil
 }
 
 func (vd *videoDatabase) CreateFile(video *Video, file multipart.File) (string, error) {
