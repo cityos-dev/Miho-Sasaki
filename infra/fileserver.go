@@ -1,11 +1,13 @@
 package infra
 
 import (
+	"errors"
 	"io"
 	"log"
 	"mime/multipart"
 	"os"
 	"strconv"
+	"videoservice/helpers"
 )
 
 const contentsPath = "../contents"
@@ -13,11 +15,12 @@ const contentsPath = "../contents"
 type FileServer interface {
 	StoreFile(name string, id int, content multipart.File) (string, error)
 	DeleteFile(name string, id int) error
+	GetFileContent(name string, id int) ([]byte, error)
 	GetFilePath(id int) string
 }
 
 type fileServer struct {
-	filePath string // /video
+	filePath string
 }
 
 func NewFileServer(path string) FileServer {
@@ -58,6 +61,27 @@ func (fs *fileServer) DeleteFile(name string, id int) error {
 	}
 
 	return nil
+}
+
+func (fs *fileServer) GetFileContent(name string, id int) ([]byte, error) {
+	f, err := os.Open(fs.GetFilePath(id) + name)
+	if err != nil {
+		return nil, errors.New(helpers.FileNotFound)
+	}
+	defer f.Close()
+	fstat, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	buf := make([]byte, fstat.Size())
+	reads, err := f.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("%d bytes are readed", reads)
+
+	return buf, nil
 }
 
 func (fs *fileServer) GetFilePath(id int) string {
