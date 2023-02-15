@@ -33,7 +33,7 @@ func (vs *videoService) GetFilePathById(ctx context.Context, id string) (*infra.
 		return nil, "", err
 	}
 
-	filePath := vs.vd.GetFilePathBy(v) + "/" + v.FileName
+	filePath := vs.vd.GetFilePathBy(v)
 
 	return v, filePath, nil
 }

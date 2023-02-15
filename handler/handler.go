@@ -110,7 +110,7 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 
 	c.Header("Content-Type", video.Type)
 	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+video.FileName+`"`)
-	c.File(filePath)
+	c.File(filePath + video.FileName)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
