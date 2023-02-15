@@ -2,13 +2,13 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"strconv"
+
+	"github.com/gin-gonic/gin"
+
 	"videoservice/helpers"
 	"videoservice/model"
-
 	"videoservice/service"
 )
 
@@ -58,36 +58,37 @@ func (sh *serverHandler) GetFiles(c *gin.Context) {
 // PostFiles store video file
 func (sh *serverHandler) PostFiles(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("data")
+	if err != nil {
+		log.Println(err)
+		sh.errorHandler(c, errors.New(helpers.BadRequest), http.StatusBadRequest)
+		return
+	}
 	defer file.Close()
 
 	ft := fileHeader.Header.Get("Content-Type")
 	if ft == "" || ft != "video/mp4" && ft != "video/mpeg" {
 		log.Println(ft)
-		sh.errorHandler(c, errors.New(helpers.ContentTypeIsWrong), http.StatusInternalServerError)
+		sh.errorHandler(c, errors.New(helpers.UnsupportedMediaType), http.StatusUnsupportedMediaType)
 		return
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	err = s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
+	contentLocation, err := s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
 	if err != nil {
-		sh.errorHandler(c, err, http.StatusInternalServerError)
+		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
-	c.Status(http.StatusNoContent)
+	c.Header("Location", contentLocation)
+	c.Status(http.StatusCreated)
 }
 
 // DeleteFilesFileId delete video file with id
 func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
-	id := c.Param("id")
-	fileId, err := strconv.Atoi(id)
-	if err != nil {
-		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
-		return
-	}
+	fileId := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	err = s.DeleteFile(c, fileId)
+	err := s.DeleteFile(c, fileId)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
@@ -98,22 +99,18 @@ func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
 
 // GetFilesFileId get file with file id
 func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
-	id := c.Param("id")
-	fileId, err := strconv.Atoi(id)
-	if err != nil {
-		sh.errorHandler(c, errors.New(helpers.ParamIsInvalid), http.StatusInternalServerError)
-		return
-	}
+	id := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	filePath, err := s.GetFilePathById(c, fileId)
+	video, filePath, err := s.GetFilePathById(c, id)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
-	c.File(filePath)
-	//c.String(http.StatusOK, "OK")
+	c.Header("Content-Type", video.Type)
+	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+video.FileName+`"`)
+	c.File(filePath + video.FileName)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {

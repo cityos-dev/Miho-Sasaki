@@ -7,10 +7,10 @@ import (
 )
 
 type GetVideo struct {
-	FileId    int
-	Name      string
-	Size      int
-	CreatedAt time.Time
+	FileId    string    `json:"fileid"`
+	Name      string    `json:"name"`
+	Size      int       `json:"size"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func ConvertVideoToVideoResponse(videos []*infra.Video) []GetVideo {
@@ -20,7 +20,7 @@ func ConvertVideoToVideoResponse(videos []*infra.Video) []GetVideo {
 
 		response = append(response,
 			GetVideo{
-				FileId:    v.Id,
+				FileId:    v.FileId,
 				Name:      v.FileName,
 				Size:      v.Size,
 				CreatedAt: v.Created,
