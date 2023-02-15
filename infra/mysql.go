@@ -1,10 +1,11 @@
 package infra
 
 import (
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"time"
 	"xorm.io/xorm"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var retry = 0
