@@ -51,7 +51,6 @@ func (sh *serverHandler) GetFiles(c *gin.Context) {
 		return
 	}
 
-	addBasicHeaders(c)
 	res := model.ConvertVideoToVideoResponse(videos)
 	c.JSON(http.StatusOK, res)
 }
@@ -80,7 +79,6 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 		return
 	}
 
-	addBasicHeaders(c)
 	c.Header("Location", contentLocation)
 	c.Status(http.StatusCreated)
 }
@@ -96,7 +94,6 @@ func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
 		return
 	}
 
-	addBasicHeaders(c)
 	c.Status(http.StatusNoContent)
 }
 
@@ -111,19 +108,10 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 		return
 	}
 
-	addBasicHeaders(c)
-	c.Header("Content-Type", video.Type)
 	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+video.FileName+`"`)
 	c.Data(http.StatusOK, video.Type, contents)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
-	addBasicHeaders(c)
 	c.String(http.StatusOK, "OK")
-}
-
-func addBasicHeaders(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-	c.Header("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Content-Type, Content-Length")
 }
