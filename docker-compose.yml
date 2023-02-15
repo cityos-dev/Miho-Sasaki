@@ -16,7 +16,7 @@ services:
       - ./ci:/ci
     depends_on:
       - db
-    command: ["/ci/wait-for-it.sh", "/app"]
+    command: ["/ci/wait-for-it.sh", "go run main.go"]
     networks:
       - default
     tty: true
