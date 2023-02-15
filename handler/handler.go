@@ -102,15 +102,15 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	id := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	v, filePath, err := s.GetFilePathById(c, id)
+	video, filePath, err := s.GetFilePathById(c, id)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
 	}
 
-	c.Header("Content-Type", v.Type)
-	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+v.FileName+`"`)
-	c.File(filePath + v.FileName)
+	c.Header("Content-Type", video.Type)
+	c.Writer.Header().Set("Content-Disposition", `attachment; filename="`+video.FileName+`"`)
+	c.File(filePath)
 }
 
 func (sh *serverHandler) GetHealth(c *gin.Context) {
