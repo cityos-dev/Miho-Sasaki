@@ -9,5 +9,3 @@ done
 >&2 echo "mysql is up - executing command"
 
 exec $@
-
-sleep 10
