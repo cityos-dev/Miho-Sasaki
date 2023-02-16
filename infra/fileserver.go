@@ -20,11 +20,12 @@ type FileServer interface {
 }
 
 type fileServer struct {
-	filePath string
+	contentsPath string
+	filePath     string
 }
 
-func NewFileServer(path string) FileServer {
-	return &fileServer{filePath: path}
+func NewFileServer(cp, fp string) FileServer {
+	return &fileServer{contentsPath: cp, filePath: fp}
 }
 
 func (fs *fileServer) StoreFile(name string, id int, content multipart.File) (string, error) {
@@ -85,5 +86,5 @@ func (fs *fileServer) GetFileContent(name string, id int) ([]byte, error) {
 }
 
 func (fs *fileServer) GetFilePath(id int) string {
-	return contentsPath + fs.filePath + "/" + strconv.Itoa(id) + "/"
+	return fs.contentsPath + fs.filePath + "/" + strconv.Itoa(id) + "/"
 }
