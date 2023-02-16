@@ -15,9 +15,10 @@ services:
     volumes:
       - ./ci:/ci
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command:
-      sh -c '/ci/wait-for-it.sh "go run main.go"; sleep 20'
+      sh -c '/ci/wait-for-it.sh "go run main.go"'
     networks:
       - default
     tty: true
