@@ -8,4 +8,4 @@ COPY . .
 
 RUN go mod tidy
 
-CMD ["sleep 10"]
+CMD sleep 10
