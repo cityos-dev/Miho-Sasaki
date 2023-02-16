@@ -7,5 +7,3 @@ ENV GO111MODULE=on
 COPY . .
 
 RUN go mod tidy
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o server main.go
