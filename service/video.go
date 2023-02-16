@@ -13,7 +13,7 @@ import (
 const Key = "video_service_factory"
 
 type VideoService interface {
-	GetFilePathById(ctx context.Context, id string) (*infra.Video, string, error)
+	GetFilePathById(ctx context.Context, id string) (*infra.Video, []byte, error)
 	GetFiles(ctx context.Context) ([]*infra.Video, error)
 	DeleteFile(ctx context.Context, id string) error
 	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) (string, error)
@@ -27,15 +27,13 @@ func NewVideoService(d infra.VideoDatabase) VideoService {
 	return &videoService{vd: d}
 }
 
-func (vs *videoService) GetFilePathById(ctx context.Context, id string) (*infra.Video, string, error) {
-	v, err := vs.vd.GetFile(id)
+func (vs *videoService) GetFilePathById(ctx context.Context, id string) (*infra.Video, []byte, error) {
+	v, contents, err := vs.vd.GetFile(id)
 	if err != nil {
-		return nil, "", err
+		return nil, contents, err
 	}
 
-	filePath := vs.vd.GetFilePathBy(v)
-
-	return v, filePath, nil
+	return v, contents, nil
 }
 
 func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
