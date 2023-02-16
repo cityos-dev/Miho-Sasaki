@@ -17,7 +17,7 @@ services:
     depends_on:
       - db
     command:
-      sh -c '/ci/wait-for-it.sh "go run main.go"; sleep 10'
+      sh -c '/ci/wait-for-it.sh "go run main.go"; sleep 20'
     networks:
       - default
     tty: true
