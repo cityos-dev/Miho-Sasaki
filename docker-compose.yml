@@ -11,7 +11,7 @@ services:
       GOARCH: amd64
       CGO_ENABLED: '0'
     ports:
-      - '8080:8080'
+      - '0.0.0.0:8080:8080'
     volumes:
       - ./ci:/ci
     depends_on:
