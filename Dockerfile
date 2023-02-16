@@ -7,3 +7,5 @@ ENV GO111MODULE=on
 COPY . .
 
 RUN go mod tidy
+
+CMD ["sleep 10"]
