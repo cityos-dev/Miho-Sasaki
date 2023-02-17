@@ -1,12 +1,13 @@
 package infra
 
 import (
-	"github.com/stretchr/testify/suite"
 	"mime/multipart"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/suite"
 )
 
 type testFileServer struct {
