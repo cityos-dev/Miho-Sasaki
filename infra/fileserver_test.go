@@ -17,78 +17,41 @@ func TestFileServer(t *testing.T) {
 	suite.Run(t, new(testFileServer))
 }
 
-func (t *testFileServer) TestStoreFile() {
+func (t *testFileServer) TestFileOperations() {
 	testFilePath := "../testing/contents"
 	testContentsPath := "/video"
-	fileServer := NewFileServer(testFilePath, testContentsPath)
-	cases := map[string]struct {
-		filePath  string
-		videoData Video
-	}{
-		"check mp4 file": {
-			filePath: "../test/post_1/sample.mp4",
-			videoData: Video{
-				Id:       1,
-				FileId:   "UQDIWWMNPPQIMGEGMGKB",
-				FileName: "sample.mp4",
-				Size:     2848208,
-				Type:     "video/mp4",
-				Created:  time.Time{},
-				Updated:  time.Time{},
-			},
-		},
-		"check mpg file": {
-			filePath: "../test/post_3/sample.mpg",
-			videoData: Video{
-				Id:       1,
-				FileId:   "UQDIWWMNPPQIDMWQNeow",
-				FileName: "sample.mpg",
-				Size:     6256514,
-				Type:     "video/mpeg",
-				Created:  time.Time{},
-				Updated:  time.Time{},
-			},
-		},
-	}
-
+	fs := NewFileServer(testFilePath, testContentsPath)
+	cases := testCasesForFiles
 	a := t.Assert()
 
 	for name, v := range cases {
 		t.Run(name, func() {
-			file, err := createFile(v.filePath)
+			file, err := openFile(v.filePath)
 			if err != nil {
 				t.Error(err)
 			}
 
-			filePath, err := fileServer.StoreFile(v.videoData.FileName, v.videoData.Id, file)
+			filePath, err := fs.StoreFile(v.videoData.FileName, v.videoData.Id, file)
 			if err != nil {
 				t.Error(err)
 			}
 
 			a.Equal(testFilePath+testContentsPath+"/"+strconv.Itoa(v.videoData.Id)+"/", filePath)
 
-			storedFile, err := os.Open(filePath + v.videoData.FileName)
+			contents, err := fs.GetFileContent(v.videoData.FileName, v.videoData.Id)
 			if err != nil {
 				t.Error(err)
 			}
 
-			info, err := storedFile.Stat()
-			if err != nil {
-				t.Error(err)
-			}
+			a.EqualValues(v.videoData.Size, len(contents))
 
-			a.EqualValues(v.videoData.Size, info.Size())
-			a.EqualValues(v.videoData.FileName, info.Name())
-
-			err = removeFileDirectory(filePath, v.videoData.FileName)
-			if err != nil {
-				a.Errorf(err, "Failed to remove file")
-			}
+			err = fs.DeleteFile(v.videoData.FileName, v.videoData.Id)
+			a.Nil(err)
 		})
 	}
 }
 
-func createFile(filePath string) (multipart.File, error) {
+func openFile(filePath string) (multipart.File, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -97,16 +60,32 @@ func createFile(filePath string) (multipart.File, error) {
 	return f, err
 }
 
-func removeFileDirectory(filePath, fileName string) error {
-	err := os.Remove(filePath + fileName)
-	if err != nil {
-		return err
-	}
-
-	err = os.Remove(filePath)
-	if err != nil {
-		return err
-	}
-
-	return nil
+var testCasesForFiles = map[string]struct {
+	filePath  string
+	videoData Video
+}{
+	"check mp4 file": {
+		filePath: "../test/post_1/sample.mp4",
+		videoData: Video{
+			Id:       1,
+			FileId:   "UQDIWWMNPPQIMGEGMGKB",
+			FileName: "sample.mp4",
+			Size:     2848208,
+			Type:     "video/mp4",
+			Created:  time.Time{},
+			Updated:  time.Time{},
+		},
+	},
+	"check mpg file": {
+		filePath: "../test/post_3/sample.mpg",
+		videoData: Video{
+			Id:       1,
+			FileId:   "UQDIWWMNPPQIDMWQNeow",
+			FileName: "sample.mpg",
+			Size:     6256514,
+			Type:     "video/mpeg",
+			Created:  time.Time{},
+			Updated:  time.Time{},
+		},
+	},
 }
