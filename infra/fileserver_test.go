@@ -80,7 +80,7 @@ var testCasesForFiles = map[string]struct {
 	"check mpg file": {
 		filePath: "../test/post_3/sample.mpg",
 		videoData: Video{
-			Id:       1,
+			Id:       2,
 			FileId:   "UQDIWWMNPPQIDMWQNeow",
 			FileName: "sample.mpg",
 			Size:     6256514,
