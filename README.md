@@ -1,3 +1,6 @@
+# To reviewer
+- I put the overview of this application in [here](README_SPECIFICATION.md). It would be nice if you check this documentation when review.
+
 # Challenge Statement
 
 This challenge is about creating a simple video storage server with REST APIs
