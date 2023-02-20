@@ -35,7 +35,7 @@ type videoDatabase struct {
 	fileServer FileServer
 }
 
-func NewVideDatabase(en *xorm.Engine, fs FileServer) VideoDatabase {
+func NewVideoDatabase(en *xorm.Engine, fs FileServer) VideoDatabase {
 	return &videoDatabase{
 		engine:     en,
 		fileServer: fs,

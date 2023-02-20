@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +12,10 @@ import (
 const Key = "video_service_factory"
 
 type VideoService interface {
-	GetFilePathById(ctx context.Context, id string) (*infra.Video, []byte, error)
-	GetFiles(ctx context.Context) ([]*infra.Video, error)
-	DeleteFile(ctx context.Context, id string) error
-	CreateFile(ctx context.Context, size int, name string, ct string, file multipart.File) (string, error)
+	GetFilePathById(id string) (*infra.Video, []byte, error)
+	GetFiles() ([]*infra.Video, error)
+	DeleteFile(id string) error
+	CreateFile(size int, name string, ct string, file multipart.File) (string, error)
 }
 
 type videoService struct {
@@ -27,7 +26,7 @@ func NewVideoService(d infra.VideoDatabase) VideoService {
 	return &videoService{vd: d}
 }
 
-func (vs *videoService) GetFilePathById(ctx context.Context, id string) (*infra.Video, []byte, error) {
+func (vs *videoService) GetFilePathById(id string) (*infra.Video, []byte, error) {
 	v, contents, err := vs.vd.GetFile(id)
 	if err != nil {
 		return nil, contents, err
@@ -36,7 +35,7 @@ func (vs *videoService) GetFilePathById(ctx context.Context, id string) (*infra.
 	return v, contents, nil
 }
 
-func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
+func (vs *videoService) GetFiles() ([]*infra.Video, error) {
 	files, err := vs.vd.GetFiles()
 	if err != nil {
 		return nil, err
@@ -45,7 +44,7 @@ func (vs *videoService) GetFiles(ctx context.Context) ([]*infra.Video, error) {
 	return files, nil
 }
 
-func (vs *videoService) DeleteFile(ctx context.Context, id string) error {
+func (vs *videoService) DeleteFile(id string) error {
 	err := vs.vd.DeleteFile(id)
 	if err != nil {
 		return err
@@ -54,7 +53,7 @@ func (vs *videoService) DeleteFile(ctx context.Context, id string) error {
 	return nil
 }
 
-func (vs *videoService) CreateFile(ctx context.Context, size int, name string, ct string,
+func (vs *videoService) CreateFile(size int, name string, ct string,
 	file multipart.File) (string, error) {
 	randomStr, err := helpers.MakeRandomStr(20)
 	if err != nil {

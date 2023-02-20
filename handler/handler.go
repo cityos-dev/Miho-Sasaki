@@ -45,7 +45,7 @@ func NewServerHandler() ServerHandler {
 // GetFiles get video files
 func (sh *serverHandler) GetFiles(c *gin.Context) {
 	s := c.MustGet(service.Key).(service.VideoService)
-	videos, err := s.GetFiles(c)
+	videos, err := s.GetFiles()
 	if err != nil {
 		sh.errorHandler(c, err, http.StatusInternalServerError)
 		return
@@ -73,7 +73,7 @@ func (sh *serverHandler) PostFiles(c *gin.Context) {
 	}
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	contentLocation, err := s.CreateFile(c, int(fileHeader.Size), fileHeader.Filename, ft, file)
+	contentLocation, err := s.CreateFile(int(fileHeader.Size), fileHeader.Filename, ft, file)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
@@ -88,7 +88,7 @@ func (sh *serverHandler) DeleteFilesFileId(c *gin.Context) {
 	fileId := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	err := s.DeleteFile(c, fileId)
+	err := s.DeleteFile(fileId)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
@@ -102,7 +102,7 @@ func (sh *serverHandler) GetFilesFileId(c *gin.Context) {
 	id := c.Param("fileid")
 
 	s := c.MustGet(service.Key).(service.VideoService)
-	video, contents, err := s.GetFilePathById(c, id)
+	video, contents, err := s.GetFilePathById(id)
 	if err != nil {
 		sh.errorHandler(c, err, helpers.GetStatusCodeFromErr(err))
 		return
