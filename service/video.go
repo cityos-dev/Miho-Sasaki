@@ -70,7 +70,7 @@ func (vs *videoService) CreateFile(size int, name string, ct string,
 		return "", err
 	}
 
-	contentLocation := filePath + video.FileName
+	contentLocation := filePath + video.FileId
 
 	return contentLocation, nil
 }
