@@ -81,6 +81,11 @@ video-server  | [GIN-debug] GET    /v1/files/:fileid         --> videoservice/ha
 video-server  | [GIN-debug] GET    /v1/health                --> videoservice/handler.ServerHandler.GetHealth-fm (4 handlers)
 ```
 
+### Execute test locally
+```shell
+go test ./...
+```
+
 ## Others
 ### Why I use file system instead of DB?
 Video contents is very large and it's not suitable for storing all byte data into the database. It's possible that a performance will be very slow and it's possible that the data will be broken when inserting and getting from it.
@@ -105,5 +110,9 @@ By adding this column, the application container starts running after the db con
 
 ### Future considerations
 - To expand this application, I think it's better to use S3 or other cloud file system to be capable of storing more contents with good performance.
-- Also if we want to stream this contents, [MediaConvert](https://aws.amazon.com/jp/mediaconvert/) is preferable to endure more traffic and store caches with [AWS ClodFront](https://aws.amazon.com/jp/cloudfront/).
+- Also, if we want to stream this contents, [MediaConvert](https://aws.amazon.com/jp/mediaconvert/) is preferable to endure more traffic and store caches with [AWS ClodFront](https://aws.amazon.com/jp/cloudfront/).
 Sample architecture that I think is like [this](https://aws.amazon.com/jp/cdp/cdn/) if we choose AWS.
+
+### Future possible work
+- Adding more tests.
+- Add lint check and test check&coverages into GitHub actions.
